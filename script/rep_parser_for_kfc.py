@@ -103,3 +103,6 @@ if __name__ == '__main__':
             print('{} has been renamed to {}.'.format(rep, new_name))
         else:
             print('{} is not a 1v1 game or does not contain exactly 2 players.'.format(rep))
+
+    # debug in windows
+    input("Press Enter to continue...")
