@@ -21,8 +21,13 @@ def length_format(seconds):
     length_string += ss + 's'
     return length_string
 
+
 def rep_new_name(rep_old_name):
     rep = sc2reader.load_replay(rep_old_name, load_map=False, level=0)
+
+    #Ensure the rep is 1v1 and have at least 2 players
+    if len(rep.teams) != 2 or rep.type != '1v1':
+        return None
 
     if rep.winner == rep.teams[0]:
         loser = rep.teams[1]
@@ -38,6 +43,7 @@ def rep_new_name(rep_old_name):
     rep_name = '{}v{} {} (win) vs {} {}.SC2Replay'.format(winner_race, loser_race, winner_id, loser_id, length_string)
     return rep_name
 
+
 if __name__ == '__main__':
     # Without extra arguments, the parser parses all replays in CURRENT directory. Else the parser parses all replays in 1st argument directory.
     if len(sys.argv) == 1:
@@ -49,5 +55,8 @@ if __name__ == '__main__':
 
     for rep in reps:
         new_name = rep_new_name(os.path.join(reps_path, rep))
-        os.rename(os.path.join(reps_path, rep), os.path.join(reps_path, new_name))
-        print('{} has been renamed to {}'.format(rep, new_name))
+        if new_name is not None:
+            os.rename(os.path.join(reps_path, rep), os.path.join(reps_path, new_name))
+            print('{} has been renamed to {}.'.format(rep, new_name))
+        else:
+            print('{} is not a 1v1 game or does not at least contain 2 players.'.format(rep))
