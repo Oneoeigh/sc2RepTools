@@ -41,18 +41,20 @@ def rep_new_name(rep_old_name):
         loser_race = loser.players[0].pick_race[0]
         winner_id = rep.winner.players[0].name
         loser_id = loser.players[0].name
+        map_name = rep.map_name
         length_string = length_format(rep.length.seconds)
 
-        rep_name = '{}v{} {} (win) vs {} {}.SC2Replay'.format(winner_race, loser_race, winner_id, loser_id, length_string)
+        rep_name = '{}v{} {} (win) vs {} {} {}.SC2Replay'.format(winner_race, loser_race, winner_id, loser_id, map_name, length_string)
     # The rep is a tie
     else:
         race1 = rep.teams[0].players[0].pick_race[0]
         race2 = rep.teams[1].players[0].pick_race[0]
         id1 = rep.teams[0].players[0].name
         id2 = rep.teams[1].players[0].name
+        map_name = rep.map_name
         length_string = length_format(rep.length.seconds)
 
-        rep_name = '{}v{} {} (draw) vs {} (draw) {}.SC2Replay'.format(race1, race2, id1, id2, length_string)
+        rep_name = '{}v{} {} (draw) vs {} (draw) {} {}.SC2Replay'.format(race1, race2, id1, id2, map_name, length_string)
     return rep_name
 
 
@@ -104,15 +106,15 @@ if __name__ == '__main__':
                 print('{} has been renamed to {}.'.format(rep, new_name))
             else:
                 print('{} is not a 1v1 game or does not contain exactly 2 players.'.format(rep))
-                pass
         except Exception:
             rep_failures.add(rep)
             # TO BE DONE: maintain an error log
 
     # print fails
-    print('Fails in dealing with these reps:')
-    for failure in rep_failures:
-        print('    ' + failure)
+    if len(rep_failures) > 0:
+        print('Fails in dealing with these reps:')
+        for failure in rep_failures:
+            print('    ' + failure)
 
     # debug in windows
     input("Press Enter to continue...")
