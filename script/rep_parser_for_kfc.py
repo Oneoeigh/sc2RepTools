@@ -94,16 +94,25 @@ if __name__ == '__main__':
     reps  = set(filter(lambda f: os.path.isfile(os.path.join(reps_path, f)) and f.lower().endswith('.sc2replay'), os.listdir(reps_path)))
     rep_old_names = set(reps)
     rep_new_names = set()
+    rep_failures = set()
 
     for rep in reps:
-        new_name = rep_new_name(os.path.join(reps_path, rep))
+        try:
+            new_name = rep_new_name(os.path.join(reps_path, rep))
+            if new_name is not None:
+                new_name = rep_re_name(rep, new_name, rep_old_names, rep_new_names, reps_path)
+                print('{} has been renamed to {}.'.format(rep, new_name))
+            else:
+                print('{} is not a 1v1 game or does not contain exactly 2 players.'.format(rep))
+                pass
+        except Exception:
+            rep_failures.add(rep)
+            # TO BE DONE: maintain an error log
 
-        if new_name is not None:
-            new_name = rep_re_name(rep, new_name, rep_old_names, rep_new_names, reps_path)
-            print('{} has been renamed to {}.'.format(rep, new_name))
-        else:
-            print('{} is not a 1v1 game or does not contain exactly 2 players.'.format(rep))
+    # print fails
+    print('Fails in dealing with these reps:')
+    for failure in rep_failures:
+        print('    ' + failure)
 
     # debug in windows
     input("Press Enter to continue...")
-    
