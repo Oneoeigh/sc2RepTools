@@ -1,6 +1,7 @@
 import sc2reader
 import os, sys
 import re
+import progressbar
 
 def length_format(seconds):
     h = seconds//3600
@@ -98,7 +99,7 @@ if __name__ == '__main__':
     rep_new_names = set()
     rep_failures = set()
 
-    for rep in reps:
+    for rep in progressbar.progressbar(reps, redirect_stdout=True):
         try:
             new_name = rep_new_name(os.path.join(reps_path, rep))
             if new_name is not None:
