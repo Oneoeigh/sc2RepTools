@@ -25,22 +25,33 @@ def length_format(seconds):
 def rep_new_name(rep_old_name):
     rep = sc2reader.load_replay(rep_old_name, load_map=False, level=0)
 
-    #Ensure the rep is 1v1 and have at least 2 players
-    if len(rep.teams) != 2 or rep.type != '1v1':
+    # Ensure the rep is 1v1 and contain exactly 2 players
+    if len(rep.teams) != 2 or rep.type != '1v1' or len(rep.teams[0].players) != 1 or len(rep.teams[1].players) != 1:
         return None
 
-    if rep.winner == rep.teams[0]:
-        loser = rep.teams[1]
+    # The rep is not a tie:
+    if rep.winner is not None:
+        if rep.winner == rep.teams[0]:
+            loser = rep.teams[1]
+        else:
+            loser = rep.teams[0]
+
+        winner_race = rep.winner.players[0].pick_race[0]
+        loser_race = loser.players[0].pick_race[0]
+        winner_id = rep.winner.players[0].name
+        loser_id = loser.players[0].name
+        length_string = length_format(rep.length.seconds)
+
+        rep_name = '{}v{} {} (win) vs {} {}.SC2Replay'.format(winner_race, loser_race, winner_id, loser_id, length_string)
+    # The rep is a tie
     else:
-        loser = rep.teams[0]
+        race1 = rep.teams[0].players[0].pick_race[0]
+        race2 = rep.teams[1].players[0].pick_race[0]
+        id1 = rep.teams[0].players[0].name
+        id2 = rep.teams[1].players[0].name
+        length_string = length_format(rep.length.seconds)
 
-    winner_race = rep.winner.players[0].pick_race[0]
-    loser_race = loser.players[0].pick_race[0]
-    winner_id = rep.winner.players[0].name
-    loser_id = loser.players[0].name
-    length_string = length_format(rep.length.seconds)
-
-    rep_name = '{}v{} {} (win) vs {} {}.SC2Replay'.format(winner_race, loser_race, winner_id, loser_id, length_string)
+        rep_name = '{}v{} {} (draw) vs {} (draw) {}.SC2Replay'.format(race1, race2, id1, id2, length_string)
     return rep_name
 
 
@@ -59,4 +70,4 @@ if __name__ == '__main__':
             os.rename(os.path.join(reps_path, rep), os.path.join(reps_path, new_name))
             print('{} has been renamed to {}.'.format(rep, new_name))
         else:
-            print('{} is not a 1v1 game or does not at least contain 2 players.'.format(rep))
+            print('{} is not a 1v1 game or does not contain exactly 2 players.'.format(rep))
