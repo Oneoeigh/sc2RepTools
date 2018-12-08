@@ -1,5 +1,6 @@
 import sc2reader
 import os, sys
+import re
 
 def length_format(seconds):
     h = seconds//3600
@@ -55,6 +56,34 @@ def rep_new_name(rep_old_name):
     return rep_name
 
 
+def rep_re_name(old_name, new_name, old_name_set, new_name_set, reps_path):
+    
+    # Add the sequence number of replay names by 1.
+    def add_name_number(name):
+        pattern = r'\((\d+)\)'
+        m = re.search(pattern, name)
+        
+        # When ther is no sequence number in the replay's name, add a (1) at the rear.
+        # E.g. 'pvp 4min18s.SC2Replay' -> 'pvp 4min18s (1).SC2Replay'
+        if m is None:
+            split_name = name.split('.')
+            name_with_num = split_name[0] + ' (1).'+ split_name[1]
+        # When there is a sequence number, add 1 to the number.
+        # E.g. 'pvp 4min18s (99).SC2Replay' -> 'pvp 4min18s (100).SC2Replay'
+        else:
+            name_with_num = re.sub(pattern, lambda m: '({})'.format(str(int(m.group(1)) + 1)), name)
+        return name_with_num
+
+    old_name_set.remove(old_name)
+    while new_name in old_name_set or new_name in new_name_set:
+        new_name = add_name_number(new_name)
+    new_name_set.add(new_name)
+
+    os.rename(os.path.join(reps_path, rep), os.path.join(reps_path, new_name))
+
+    return new_name
+
+
 if __name__ == '__main__':
     # Without extra arguments, the parser parses all replays in CURRENT directory. Else the parser parses all replays in 1st argument directory.
     if len(sys.argv) == 1:
@@ -62,12 +91,15 @@ if __name__ == '__main__':
     else:
         reps_path = sys.argv[1]
 
-    reps  = list(filter(lambda f: os.path.isfile(os.path.join(reps_path, f)) and f.lower().endswith('.sc2replay'), os.listdir(reps_path)))
+    reps  = set(filter(lambda f: os.path.isfile(os.path.join(reps_path, f)) and f.lower().endswith('.sc2replay'), os.listdir(reps_path)))
+    rep_old_names = set(reps)
+    rep_new_names = set()
 
     for rep in reps:
         new_name = rep_new_name(os.path.join(reps_path, rep))
+
         if new_name is not None:
-            os.rename(os.path.join(reps_path, rep), os.path.join(reps_path, new_name))
+            new_name = rep_re_name(rep, new_name, rep_old_names, rep_new_names, reps_path)
             print('{} has been renamed to {}.'.format(rep, new_name))
         else:
             print('{} is not a 1v1 game or does not contain exactly 2 players.'.format(rep))
