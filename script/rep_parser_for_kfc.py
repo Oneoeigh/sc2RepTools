@@ -103,6 +103,7 @@ def rep_remame_indir(reps_path):
                 print('{} is not a 1v1 game or does not contain exactly 2 players.'.format(rep))
         except Exception:
             rep_failures.add(rep)
+            print('{} causes an internal exception. See more details in err log.'.format(rep))
             # TO BE DONE: maintain an error log
 
     # print fails
