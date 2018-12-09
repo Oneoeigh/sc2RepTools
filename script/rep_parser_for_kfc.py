@@ -87,13 +87,7 @@ def rep_re_name(old_name, new_name, old_name_set, new_name_set, reps_path):
     return new_name
 
 
-if __name__ == '__main__':
-    # Without extra arguments, the parser parses all replays in CURRENT directory. Else the parser parses all replays in 1st argument directory.
-    if len(sys.argv) == 1:
-        reps_path = os.curdir
-    else:
-        reps_path = sys.argv[1]
-
+def rep_remame_indir(reps_path):
     reps  = set(filter(lambda f: os.path.isfile(os.path.join(reps_path, f)) and f.lower().endswith('.sc2replay'), os.listdir(reps_path)))
     rep_old_names = set(reps)
     rep_new_names = set()
@@ -116,6 +110,16 @@ if __name__ == '__main__':
         print('Fails in dealing with these reps:')
         for failure in rep_failures:
             print('    ' + failure)
+
+
+if __name__ == '__main__':
+    # Without extra arguments, the parser parses all replays in CURRENT directory. Else the parser parses all replays in 1st argument directory.
+    if len(sys.argv) == 1:
+        reps_path = os.curdir
+    else:
+        reps_path = sys.argv[1]
+
+    rep_remame_indir(reps_path)
 
     # debug in windows
     input("Press Enter to continue...")
