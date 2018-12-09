@@ -82,7 +82,7 @@ def rep_re_name(old_name, new_name, old_name_set, new_name_set, reps_path):
         new_name = add_name_number(new_name)
     new_name_set.add(new_name)
 
-    os.rename(os.path.join(reps_path, rep), os.path.join(reps_path, new_name))
+    os.rename(os.path.join(reps_path, old_name), os.path.join(reps_path, new_name))
 
     return new_name
 
