@@ -24,12 +24,20 @@ def length_format(seconds):
     return length_string
 
 
-def rep_new_name(rep_old_name):
-    rep = sc2reader.load_replay(rep_old_name, load_map=False, level=0)
+def rep_new_name(rep_old_name, rep):
+    """
+    Parameters: rep_old_name, rep
+        rep_old_name: string, the rep's old name
+        rep: sc2replay file, decoded by lib sc2reader
+    Return: new_name, is1v1
+        new_name: string, replay's new name
+        is1v1: bool, whether the rep is 1v1 and contains exactly 2 players.
+    """
 
     # Ensure the rep is 1v1 and contain exactly 2 players
     if len(rep.teams) != 2 or rep.type != '1v1' or len(rep.teams[0].players) != 1 or len(rep.teams[1].players) != 1:
-        return None
+        # Add a '! ' to the new name to avoid repitation of rename 
+        return '! ' + rep_old_name, False
 
     # The rep is not a tie:
     if rep.winner is not None:
@@ -56,11 +64,12 @@ def rep_new_name(rep_old_name):
         length_string = length_format(rep.length.seconds)
 
         rep_name = '{}v{} {} (draw) vs {} (draw) {} {}.SC2Replay'.format(race1, race2, id1, id2, map_name, length_string)
-    return rep_name
+
+    # Add a '! ' to the new name to avoid repitation of rename    
+    return '! ' + rep_name, True
 
 
 def rep_re_name(old_name, new_name, old_name_set, new_name_set, reps_path):
-    
     # Add the sequence number of replay names by 1.
     def add_name_number(name):
         pattern = r'\((\d+)\)'
@@ -94,12 +103,21 @@ def rep_remame_indir(reps_path):
     rep_failures = set()
 
     for rep in progressbar.progressbar(reps, redirect_stdout=True):
+        # skip the reps start with '!'
+        if rep.startswith('!'):
+            print('{} has been labelled by "!" and thus is ignored.'.format(rep))
+            continue
+        
+        # the rename process
         try:
-            new_name = rep_new_name(os.path.join(reps_path, rep))
-            if new_name is not None:
-                new_name = rep_re_name(rep, new_name, rep_old_names, rep_new_names, reps_path)
+            rep_file = sc2reader.load_replay(os.path.join(reps_path, rep), load_map=False, level=0)
+            new_name, is1v1 = rep_new_name(rep, rep_file)
+            
+            new_name = rep_re_name(rep, new_name, rep_old_names, rep_new_names, reps_path)
+            if is1v1:
                 print('{} has been renamed to {}.'.format(rep, new_name))
             else:
+                # do not display new rep name with '!'' label
                 print('{} is not a 1v1 game or does not contain exactly 2 players.'.format(rep))
         except Exception:
             rep_failures.add(rep)
