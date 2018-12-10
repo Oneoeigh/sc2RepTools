@@ -1,2 +1,5 @@
 # Example replay packs
 replays/
+
+# Python temporary files
+__pycache__/
